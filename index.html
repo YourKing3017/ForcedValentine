@@ -101,7 +101,7 @@
     // Interaction tuning
     const TRIGGER_DIST = 160;    // px
     const TELEPORT_DIST = 5;     // px to rect edge
-    const wallZone = 80;
+    const wallZone = 120;
 
     // Motion
     let noVX = 0, noVY = 0;
@@ -274,7 +274,7 @@
         const d = distCenter === 0 ? 1 : distCenter;
         const ux = dx / d, uy = dy / d;
 
-        const mouseAccel = 0.9 + 2.8 * t;
+        const mouseAccel = 2.2 + 6.5 * t;
         ax += -ux * mouseAccel;
         ay += -uy * mouseAccel;
       }
@@ -294,8 +294,8 @@
       if (dBottom < wallZone) ay -= (wallZone - dBottom) / wallZone * 2.6;
 
       // Velocity + damping
-      const damping = 0.86;
-      const maxSpeed = 18.0;
+      const damping = 0.92;
+      const maxSpeed = 32.0;
 
       noVX = (noVX + ax) * damping;
       noVY = (noVY + ay) * damping;
@@ -323,8 +323,8 @@
 
       // Settle when far
       if (distCenter >= TRIGGER_DIST) {
-        noVX *= 0.75;
-        noVY *= 0.75;
+        noVX *= 0.90;
+        noVY *= 0.90;
       }
     }
 
