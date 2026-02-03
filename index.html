@@ -275,8 +275,19 @@
         const ux = dx / d, uy = dy / d;
 
         const mouseAccel = 2.2 + 6.5 * t;
-        ax += -ux * mouseAccel;
-        ay += -uy * mouseAccel;
+
+        // Perpendicular unit vector (rotated 90°)
+        const px = -uy;
+        const py =  ux;
+
+        // Side-step amount increases when closer
+        const strafe = 0.8 + 2.5 * t;
+
+        // Flip direction sometimes for unpredictability
+        const jitter = (Math.random() < 0.08 ? -1 : 1);
+
+        ax += (-ux * mouseAccel) + (px * strafe * jitter);
+        ay += (-uy * mouseAccel) + (py * strafe * jitter);
       }
 
       // Wall repulsion
@@ -288,10 +299,10 @@
       const dTop    = y - bounds.minY;
       const dBottom = bounds.maxY - y;
 
-      if (dLeft   < wallZone) ax += (wallZone - dLeft)   / wallZone * 2.6;
-      if (dRight  < wallZone) ax -= (wallZone - dRight)  / wallZone * 2.6;
-      if (dTop    < wallZone) ay += (wallZone - dTop)    / wallZone * 2.6;
-      if (dBottom < wallZone) ay -= (wallZone - dBottom) / wallZone * 2.6;
+      if (dLeft   < wallZone) ax += (wallZone - dLeft)   / wallZone * 4.5;
+      if (dRight  < wallZone) ax -= (wallZone - dRight)  / wallZone * 4.5;
+      if (dTop    < wallZone) ay += (wallZone - dTop)    / wallZone * 4.5;
+      if (dBottom < wallZone) ay -= (wallZone - dBottom) / wallZone * 4.5;
 
       // Velocity + damping
       const damping = 0.92;
