@@ -387,7 +387,7 @@
       if (dTop    < wallZone) ay += (wallZone - dTop)    / wallZone * 4.5;
       if (dBottom < wallZone) ay -= (wallZone - dBottom) / wallZone * 4.5;
 
-      const damping = 0.92;
+      const damping = 0.89;
       const maxSpeed = 32.0;
 
       noVX = (noVX + ax) * damping;
