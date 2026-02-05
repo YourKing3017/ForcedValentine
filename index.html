@@ -1,360 +1,327 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Valentine?</title>
-  <style>
-    :root {
-      --bg: #fff5f7;
-      --text: #111;
-      --yes: #22c55e;
-      --no:  #f43f5e;
-    }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: var(--bg);
-      overflow: hidden;
-    }
-    .wrap {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      user-select: none;
-    }
-    h1 {
-      position: absolute;
-      top: 42px;
-      left: 50%;
-      transform: translateX(-50%);
-      margin: 0;
-      font-size: 28px;
-      font-weight: 800;
-      color: var(--text);
-      text-align: center;
-      white-space: nowrap;
-    }
-    #result {
-      position: absolute;
-      bottom: 28px;
-      left: 0;
-      width: 100%;
-      text-align: center;
-      font-size: 16px;
-      color: var(--text);
-    }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Valentine?</title>
 
-    /* Capsule buttons */
-    .btn {
-      position: absolute;
-      width: 140px;
-      height: 56px;
-      border: none;
-      border-radius: 999px;
-      color: #fff;
-      font-weight: 800;
-      font-size: 18px;
-      cursor: pointer;
-      box-shadow: 0 1px 0 rgba(0,0,0,.15);
-      transition: transform 60ms linear;
-      will-change: transform, left, top, width, height;
-    }
-    .btn:active { filter: brightness(.9); transform: translateY(1px); }
-    #yes { background: var(--yes); }
-    #no  { background: var(--no);  }
+<style>
+:root{
+  --bg:#fff5f7;
+  --text:#111;
+  --yes:#22c55e;
+  --no:#f43f5e;
+}
 
-    /* Keep hitbox aligned with visual size */
-    .btn-inner {
-      width: 100%;
-      height: 100%;
-      display: grid;
-      place-items: center;
-    }
-  </style>
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
+  overflow:hidden;
+}
+
+/* layout */
+.wrap{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  user-select:none;
+}
+
+h1{
+  position:absolute;
+  top:42px;
+  left:50%;
+  transform:translateX(-50%);
+  font-size:28px;
+  font-weight:800;
+  margin:0;
+}
+
+#result{
+  position:absolute;
+  bottom:28px;
+  width:100%;
+  text-align:center;
+  font-size:16px;
+}
+
+/* buttons */
+.btn{
+  position:absolute;
+  width:140px;
+  height:56px;
+  border:none;
+  border-radius:999px;
+  color:#fff;
+  font-weight:800;
+  font-size:18px;
+  cursor:pointer;
+  box-shadow:0 1px 0 rgba(0,0,0,.15);
+}
+#yes{background:var(--yes)}
+#no{background:var(--no)}
+
+.btn-inner{
+  display:grid;
+  place-items:center;
+  width:100%;
+  height:100%;
+}
+
+/* ===== Celebration Layer ===== */
+
+#fx{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+#celebrate{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  display:none;
+}
+
+#celebrate.show{display:block}
+
+.card{
+  position:absolute;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%) scale(.8);
+  padding:20px 28px;
+  border-radius:20px;
+  background:rgba(255,255,255,.8);
+  backdrop-filter:blur(8px);
+  box-shadow:0 16px 40px rgba(0,0,0,.15);
+  text-align:center;
+  animation:pop .55s cubic-bezier(.2,1.2,.2,1) forwards;
+}
+
+@keyframes pop{
+  from{opacity:0;transform:translate(-50%,-50%) scale(.6)}
+  to{opacity:1;transform:translate(-50%,-50%) scale(1)}
+}
+
+.card .title{
+  font-size:30px;
+  font-weight:900;
+}
+
+.card .sub{
+  font-size:14px;
+  opacity:.7;
+}
+
+/* hearts */
+.heart{
+  position:absolute;
+  animation:float 1400ms ease-out forwards;
+}
+
+@keyframes float{
+  from{opacity:1;transform:translate(0,0) scale(.8)}
+  to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.4)}
+}
+
+/* cupid */
+#cupid{
+  position:absolute;
+  top:25%;
+  left:-80px;
+  font-size:50px;
+  opacity:0;
+}
+
+#celebrate.fly #cupid{
+  animation:fly 1.4s ease-in-out forwards;
+}
+
+@keyframes fly{
+  0%{left:-80px;opacity:0}
+  10%{opacity:1}
+  100%{left:calc(100% + 80px);opacity:0}
+}
+</style>
 </head>
+
 <body>
-  <div class="wrap" id="wrap">
-    <h1>Will you be my valentine?</h1>
+<div class="wrap" id="wrap">
 
-    <button class="btn" id="yes"><span class="btn-inner">Yes</span></button>
-    <button class="btn" id="no"><span class="btn-inner">No</span></button>
+<h1>Will you be my valentine?</h1>
 
-    <div id="result">&nbsp;</div>
+<button id="yes" class="btn"><span class="btn-inner">Yes</span></button>
+<button id="no"  class="btn"><span class="btn-inner">No</span></button>
+
+<canvas id="fx"></canvas>
+
+<div id="celebrate">
+  <div class="card">
+    <div class="title">Yay! Luv u 2! 💖</div>
+    <div class="sub">Happy Valentine’s Day</div>
   </div>
+  <div id="cupid">💘</div>
+</div>
 
-  <script>
-    const wrap = document.getElementById('wrap');
-    const yesBtn = document.getElementById('yes');
-    const noBtn  = document.getElementById('no');
-    const result = document.getElementById('result');
+<div id="result">&nbsp;</div>
 
-    // Base sizes/positions
-    const yesBase = { w: 140, h: 56 };
-    const noBase  = { w: 140, h: 56 };
+</div>
 
-    // Scale constraints (match your Java logic)
-    const YES_MAX = 1.30, YES_MIN = 1.00;
-    const NO_MIN  = 0.70, NO_MAX  = 1.00;
+<script>
+/* =============================
+   YOUR EXISTING BUTTON LOGIC
+============================= */
 
-    // Interaction tuning
-    const TRIGGER_DIST = 160;    // px
-    const TELEPORT_DIST = 5;     // px to rect edge
-    const wallZone = 120;
+const wrap = document.getElementById('wrap');
+const yesBtn = document.getElementById('yes');
+const noBtn = document.getElementById('no');
+const result = document.getElementById('result');
 
-    // Motion
-    let noVX = 0, noVY = 0;
-    let lastTeleport = 0;
+const yesBase = {w:140,h:56};
+const noBase = {w:140,h:56};
 
-    // Positions (top-left)
-    let yesBasePos = null; // {x,y}
-    let noPos = null;      // current no button {x,y}
-    let noScale = 1.0;
-    let yesScale = 1.0;
+const YES_MAX=1.3, YES_MIN=1;
+const NO_MIN=.7, NO_MAX=1;
 
-    // Helpers
-    const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, v));
-    const hypot = (a,b) => Math.hypot(a,b);
+const TRIGGER_DIST=160;
+const TELEPORT_DIST=5;
 
-    function layoutInitial() {
-      const w = wrap.clientWidth;
-      const h = wrap.clientHeight;
-      const centerY = Math.floor(h * 0.55);
+let noVX=0,noVY=0;
 
-      yesBasePos = { x: Math.floor(w/2 - 170), y: Math.floor(centerY - yesBase.h/2) };
-      const noBasePos = { x: Math.floor(w/2 + 30), y: Math.floor(centerY - noBase.h/2) };
+let yesBasePos,noPos;
 
-      noPos = { x: noBasePos.x, y: noBasePos.y };
+/* position buttons */
+function layout(){
+  const w=wrap.clientWidth;
+  const h=wrap.clientHeight;
+  const cy=h*0.55;
 
-      applyButton(yesBtn, yesBasePos.x, yesBasePos.y, yesBase, 1.0, true);
-      applyButton(noBtn,  noPos.x,      noPos.y,      noBase,  1.0, false);
-    }
+  yesBasePos={x:w/2-170,y:cy-28};
+  noPos={x:w/2+30,y:cy-28};
 
-    function applyButton(el, x, y, base, scale, anchorCenter) {
-      const w = Math.round(base.w * scale);
-      const h = Math.round(base.h * scale);
+  setBtn(yesBtn,yesBasePos,1,true);
+  setBtn(noBtn,noPos,1,false);
+}
+layout();
+window.onresize=layout;
 
-      if (anchorCenter) {
-        const baseCx = x + base.w / 2;
-        const baseCy = y + base.h / 2;
-        x = Math.round(baseCx - w / 2);
-        y = Math.round(baseCy - h / 2);
-      }
+function setBtn(btn,pos,scale,center){
+  const w=noBase.w*scale,h=noBase.h*scale;
+  if(center){
+    btn.style.left=(pos.x+noBase.w/2-w/2)+'px';
+    btn.style.top=(pos.y+noBase.h/2-h/2)+'px';
+  }else{
+    btn.style.left=pos.x+'px';
+    btn.style.top=pos.y+'px';
+  }
+  btn.style.width=w+'px';
+  btn.style.height=h+'px';
+}
 
-      el.style.left = x + 'px';
-      el.style.top  = y + 'px';
-      el.style.width  = w + 'px';
-      el.style.height = h + 'px';
-      return { w, h, x, y };
-    }
+/* dodge logic */
+wrap.onmousemove=e=>{
+  const rect=noBtn.getBoundingClientRect();
+  const dx=e.clientX-(rect.left+rect.width/2);
+  const dy=e.clientY-(rect.top+rect.height/2);
+  const d=Math.hypot(dx,dy);
 
-    function rectOf(x, y, w, h) {
-      return { x, y, w, h, cx: x + w/2, cy: y + h/2 };
-    }
+  let yesScale=1,noScale=1;
 
-    function distanceToRect(px, py, r) {
-      let dx = 0;
-      if (px < r.x) dx = r.x - px;
-      else if (px > r.x + r.w) dx = px - (r.x + r.w);
+  if(d<TRIGGER_DIST){
+    const t=(TRIGGER_DIST-d)/TRIGGER_DIST;
+    yesScale=YES_MIN+(YES_MAX-YES_MIN)*t;
+    noScale=NO_MAX-(NO_MAX-NO_MIN)*t;
+  }
 
-      let dy = 0;
-      if (py < r.y) dy = r.y - py;
-      else if (py > r.y + r.h) dy = py - (r.y + r.h);
+  setBtn(yesBtn,yesBasePos,yesScale,true);
 
-      return Math.hypot(dx, dy);
-    }
+  if(d<TELEPORT_DIST){
+    noPos.x=Math.random()*(wrap.clientWidth-140);
+    noPos.y=Math.random()*(wrap.clientHeight-140);
+  }else{
+    noVX+=(-dx/d)*2.5;
+    noVY+=(-dy/d)*2.5;
+    noVX*=.9; noVY*=.9;
+    noPos.x+=noVX; noPos.y+=noVY;
+  }
 
-    function computeBoundsForNo(scaledNoW, scaledNoH) {
-      const margin = 14;
-      const topLimit = 90;
-      const bottomLimit = wrap.clientHeight - 90;
+  setBtn(noBtn,noPos,noScale,false);
+};
 
-      const minX = margin;
-      const maxX = wrap.clientWidth - margin - scaledNoW;
-      const minY = topLimit;
-      const maxY = bottomLimit - scaledNoH;
+/* =============================
+   CELEBRATION EFFECTS
+============================= */
 
-      return { minX, maxX, minY, maxY, ok: (maxX > minX && maxY > minY) };
-    }
+const fx=document.getElementById('fx');
+const ctx=fx.getContext('2d');
+const celebrate=document.getElementById('celebrate');
 
-    function teleportNo(mouseX, mouseY, scaledNoW, scaledNoH, bounds, currentRect) {
-      const now = performance.now();
-      // cooldown = 0 (as in your code); keep a tiny guard anyway
-      if (now - lastTeleport < 0) return;
-      lastTeleport = now;
+function resizeFX(){
+  fx.width=wrap.clientWidth;
+  fx.height=wrap.clientHeight;
+}
+resizeFX();
+window.addEventListener('resize',resizeFX);
 
-      let bestScore = -1e18;
-      let bestX = currentRect.x, bestY = currentRect.y;
+let particles=[];
 
-      const tries = 18;
-      for (let i = 0; i < tries; i++) {
-        const rx = bounds.minX + Math.random() * (bounds.maxX - bounds.minX);
-        const ry = bounds.minY + Math.random() * (bounds.maxY - bounds.minY);
+function burst(x,y){
+  for(let i=0;i<80;i++){
+    const a=Math.random()*6.28;
+    const s=2+Math.random()*5;
+    particles.push({x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,life:60});
+  }
+}
 
-        const candCX = rx + scaledNoW / 2;
-        const candCY = ry + scaledNoH / 2;
-        const d = hypot(mouseX - candCX, mouseY - candCY);
+function animate(){
+  ctx.clearRect(0,0,fx.width,fx.height);
+  particles.forEach(p=>{
+    p.x+=p.vx;
+    p.y+=p.vy;
+    p.vy+=.1;
+    p.life--;
+    ctx.fillStyle=`hsl(${Math.random()*360},80%,60%)`;
+    ctx.fillRect(p.x,p.y,3,3);
+  });
+  particles=particles.filter(p=>p.life>0);
+  if(particles.length)requestAnimationFrame(animate);
+}
 
-        const wall = Math.min(
-          Math.min(rx - bounds.minX, bounds.maxX - rx),
-          Math.min(ry - bounds.minY, bounds.maxY - ry)
-        );
+function hearts(){
+  for(let i=0;i<20;i++){
+    const h=document.createElement('div');
+    h.className='heart';
+    h.textContent='💖';
+    h.style.left=wrap.clientWidth/2+'px';
+    h.style.top=wrap.clientHeight/2+'px';
+    h.style.setProperty('--dx',(Math.random()*300-150)+'px');
+    h.style.setProperty('--dy',(-300-Math.random()*200)+'px');
+    wrap.appendChild(h);
+    setTimeout(()=>h.remove(),1400);
+  }
+}
 
-        const score = d + wall * 0.35;
-        if (score > bestScore) {
-          bestScore = score;
-          bestX = rx;
-          bestY = ry;
-        }
-      }
+function celebrateYes(){
+  result.textContent='Yay! Luv u 2!';
+  celebrate.classList.add('show');
+  celebrate.classList.add('fly');
 
-      noVX = 0; noVY = 0;
-      noPos.x = bestX;
-      noPos.y = bestY;
-      applyButton(noBtn, noPos.x, noPos.y, noBase, noScale, false);
-    }
+  burst(wrap.clientWidth/2,wrap.clientHeight/2);
+  hearts();
+  animate();
 
-    function onMouseMove(e) {
-      if (!yesBasePos || !noPos) return;
+  setTimeout(()=>{
+    celebrate.classList.remove('show');
+    celebrate.classList.remove('fly');
+  },2000);
+}
 
-      const mouseX = e.clientX;
-      const mouseY = e.clientY;
+yesBtn.onclick=celebrateYes;
+noBtn.onclick=()=>result.textContent='Noooooo how did u click it :(';
 
-      // Current No rect (based on DOM computed size)
-      const noRectDOM = noBtn.getBoundingClientRect();
-      const wrapRect = wrap.getBoundingClientRect();
-
-      const noRect = rectOf(
-        noRectDOM.left - wrapRect.left,
-        noRectDOM.top  - wrapRect.top,
-        noRectDOM.width,
-        noRectDOM.height
-      );
-
-      const dx = mouseX - (noRect.cx + wrapRect.left);
-      const dy = mouseY - (noRect.cy + wrapRect.top);
-      const distCenter = Math.hypot(dx, dy);
-
-      // Scaling
-      yesScale = 1.0;
-      noScale = 1.0;
-
-      if (distCenter < TRIGGER_DIST) {
-        const t = (TRIGGER_DIST - distCenter) / TRIGGER_DIST; // 0..1
-        yesScale = clamp(YES_MIN + (YES_MAX - YES_MIN) * t, YES_MIN, YES_MAX);
-        noScale  = clamp(NO_MAX  - (NO_MAX  - NO_MIN)  * t, NO_MIN,  NO_MAX);
-      }
-
-      // Apply Yes scaling (center anchored around base)
-      applyButton(yesBtn, yesBasePos.x, yesBasePos.y, yesBase, yesScale, true);
-
-      // Apply No scaling and movement
-      const scaledNoW = Math.round(noBase.w * noScale);
-      const scaledNoH = Math.round(noBase.h * noScale);
-
-      const bounds = computeBoundsForNo(scaledNoW, scaledNoH);
-      if (!bounds.ok) return;
-
-      // Teleport if mouse is within TELEPORT_DIST of the No button edge
-      const edgeDist = distanceToRect(mouseX - wrapRect.left, mouseY - wrapRect.top, {
-        x: noRect.x, y: noRect.y, w: noRect.w, h: noRect.h
-      });
-
-      if (edgeDist <= TELEPORT_DIST) {
-        teleportNo(mouseX - wrapRect.left, mouseY - wrapRect.top, scaledNoW, scaledNoH, bounds, noRect);
-        return;
-      }
-
-      // Smooth flee with wall repulsion
-      let ax = 0, ay = 0;
-
-      if (distCenter < TRIGGER_DIST) {
-        const t = (TRIGGER_DIST - distCenter) / TRIGGER_DIST;
-        const d = distCenter === 0 ? 1 : distCenter;
-        const ux = dx / d, uy = dy / d;
-
-        const mouseAccel = 2.2 + 6.5 * t;
-
-        // Perpendicular unit vector (rotated 90°)
-        const px = -uy;
-        const py =  ux;
-
-        // Side-step amount increases when closer
-        const strafe = 0.8 + 2.5 * t;
-
-        // Flip direction sometimes for unpredictability
-        const jitter = (Math.random() < 0.08 ? -1 : 1);
-
-        ax += (-ux * mouseAccel) + (px * strafe * jitter);
-        ay += (-uy * mouseAccel) + (py * strafe * jitter);
-      }
-
-      // Wall repulsion
-      const x = noRect.x;
-      const y = noRect.y;
-
-      const dLeft   = x - bounds.minX;
-      const dRight  = bounds.maxX - x;
-      const dTop    = y - bounds.minY;
-      const dBottom = bounds.maxY - y;
-
-      if (dLeft   < wallZone) ax += (wallZone - dLeft)   / wallZone * 4.5;
-      if (dRight  < wallZone) ax -= (wallZone - dRight)  / wallZone * 4.5;
-      if (dTop    < wallZone) ay += (wallZone - dTop)    / wallZone * 4.5;
-      if (dBottom < wallZone) ay -= (wallZone - dBottom) / wallZone * 4.5;
-
-      // Velocity + damping
-      const damping = 0.92;
-      const maxSpeed = 32.0;
-
-      noVX = (noVX + ax) * damping;
-      noVY = (noVY + ay) * damping;
-
-      const speed = Math.hypot(noVX, noVY);
-      if (speed > maxSpeed) {
-        noVX = noVX / speed * maxSpeed;
-        noVY = noVY / speed * maxSpeed;
-      }
-
-      let nx = x + noVX;
-      let ny = y + noVY;
-
-      // Clamp + mild bounce
-      if (nx < bounds.minX) { nx = bounds.minX; noVX = Math.abs(noVX) * 0.5; }
-      if (nx > bounds.maxX) { nx = bounds.maxX; noVX = -Math.abs(noVX) * 0.5; }
-      if (ny < bounds.minY) { ny = bounds.minY; noVY = Math.abs(noVY) * 0.5; }
-      if (ny > bounds.maxY) { ny = bounds.maxY; noVY = -Math.abs(noVY) * 0.5; }
-
-      // Set new position
-      noPos.x = nx;
-      noPos.y = ny;
-
-      applyButton(noBtn, noPos.x, noPos.y, noBase, noScale, false);
-
-      // Settle when far
-      if (distCenter >= TRIGGER_DIST) {
-        noVX *= 0.90;
-        noVY *= 0.90;
-      }
-    }
-
-    // Click behavior
-    yesBtn.addEventListener('click', () => result.textContent = 'Yay! Luv u 2 :D');
-    noBtn.addEventListener('click',  () => result.textContent = 'Noooooo how did u click it :(');
-
-    // Make No react if mouse enters/presses it (extra safety like your Java code)
-    function forceFleeFromEvent(ev) {
-      // synthesize mouse move using current cursor position when event fires
-      if (ev && typeof ev.clientX === 'number') onMouseMove(ev);
-    }
-    noBtn.addEventListener('mouseenter', forceFleeFromEvent);
-    noBtn.addEventListener('mousedown',  forceFleeFromEvent);
-
-    // Init
-    layoutInitial();
-    window.addEventListener('resize', () => layoutInitial());
-    wrap.addEventListener('mousemove', onMouseMove);
-  </script>
+</script>
 </body>
 </html>
