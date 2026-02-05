@@ -62,13 +62,12 @@
       box-shadow: 0 1px 0 rgba(0,0,0,.15);
       transition: transform 60ms linear;
       will-change: transform, left, top, width, height;
-      z-index: 6; /* above FX canvas */
+      z-index: 6;
     }
     .btn:active { filter: brightness(.9); transform: translateY(1px); }
     #yes { background: var(--yes); }
     #no  { background: var(--no);  }
 
-    /* Keep hitbox aligned with visual size */
     .btn-inner {
       width: 100%;
       height: 100%;
@@ -76,11 +75,7 @@
       place-items: center;
     }
 
-    /* =========================
-       Celebration (Yes click)
-       ========================= */
-
-    /* Canvas fireworks/confetti */
+    /* ===== Celebration FX ===== */
     #fx {
       position: absolute;
       inset: 0;
@@ -90,17 +85,15 @@
       z-index: 2;
     }
 
-    /* Overlay */
     #celebrate {
       position: absolute;
       inset: 0;
       pointer-events: none;
       display: none;
-      z-index: 10; /* above everything */
+      z-index: 10;
     }
     #celebrate.show { display: block; }
 
-    /* Glass card message */
     #celebrate .card {
       position: absolute;
       left: 50%;
@@ -134,7 +127,6 @@
       100% { transform: translate(-50%, -50%) scale(1.00); opacity: 1; }
     }
 
-    /* Floating heart particles */
     .heart {
       position: absolute;
       will-change: transform, opacity;
@@ -148,7 +140,6 @@
       100% { transform: translate(var(--dx), var(--dy)) scale(1.35); opacity: 0; }
     }
 
-    /* Cupid fly-by */
     #cupid {
       position: absolute;
       top: 22%;
@@ -177,7 +168,6 @@
     <button class="btn" id="yes"><span class="btn-inner">Yes</span></button>
     <button class="btn" id="no"><span class="btn-inner">No</span></button>
 
-    <!-- FX + overlay -->
     <canvas id="fx"></canvas>
     <div id="celebrate" aria-hidden="true">
       <div class="card">
@@ -200,7 +190,7 @@
     const yesBase = { w: 140, h: 56 };
     const noBase  = { w: 140, h: 56 };
 
-    // Scale constraints (match your Java logic)
+    // Scale constraints
     const YES_MAX = 1.30, YES_MIN = 1.00;
     const NO_MIN  = 0.70, NO_MAX  = 1.00;
 
@@ -219,7 +209,6 @@
     let noScale = 1.0;
     let yesScale = 1.0;
 
-    // Helpers
     const clamp = (v, mn, mx) => Math.max(mn, Math.min(mx, v));
     const hypot = (a,b) => Math.hypot(a,b);
 
@@ -286,6 +275,7 @@
 
     function teleportNo(mouseX, mouseY, scaledNoW, scaledNoH, bounds, currentRect) {
       const now = performance.now();
+      // cooldown = 0 like your version
       if (now - lastTeleport < 0) return;
       lastTeleport = now;
 
@@ -320,13 +310,13 @@
       applyButton(noBtn, noPos.x, noPos.y, noBase, noScale, false);
     }
 
+    // ===== THIS IS YOUR ORIGINAL (GOOD) NO MOVEMENT LOGIC, RESTORED =====
     function onMouseMove(e) {
       if (!yesBasePos || !noPos) return;
 
       const mouseX = e.clientX;
       const mouseY = e.clientY;
 
-      // Current No rect (based on DOM computed size)
       const noRectDOM = noBtn.getBoundingClientRect();
       const wrapRect = wrap.getBoundingClientRect();
 
@@ -341,27 +331,23 @@
       const dy = mouseY - (noRect.cy + wrapRect.top);
       const distCenter = Math.hypot(dx, dy);
 
-      // Scaling
       yesScale = 1.0;
-      noScale = 1.0;
+      noScale  = 1.0;
 
       if (distCenter < TRIGGER_DIST) {
-        const t = (TRIGGER_DIST - distCenter) / TRIGGER_DIST; // 0..1
+        const t = (TRIGGER_DIST - distCenter) / TRIGGER_DIST;
         yesScale = clamp(YES_MIN + (YES_MAX - YES_MIN) * t, YES_MIN, YES_MAX);
         noScale  = clamp(NO_MAX  - (NO_MAX  - NO_MIN)  * t, NO_MIN,  NO_MAX);
       }
 
-      // Apply Yes scaling (center anchored around base)
       applyButton(yesBtn, yesBasePos.x, yesBasePos.y, yesBase, yesScale, true);
 
-      // Apply No scaling and movement
       const scaledNoW = Math.round(noBase.w * noScale);
       const scaledNoH = Math.round(noBase.h * noScale);
 
       const bounds = computeBoundsForNo(scaledNoW, scaledNoH);
       if (!bounds.ok) return;
 
-      // Teleport if mouse is within TELEPORT_DIST of the No button edge
       const edgeDist = distanceToRect(mouseX - wrapRect.left, mouseY - wrapRect.top, {
         x: noRect.x, y: noRect.y, w: noRect.w, h: noRect.h
       });
@@ -371,7 +357,6 @@
         return;
       }
 
-      // Smooth flee with wall repulsion
       let ax = 0, ay = 0;
 
       if (distCenter < TRIGGER_DIST) {
@@ -380,22 +365,15 @@
         const ux = dx / d, uy = dy / d;
 
         const mouseAccel = 2.2 + 6.5 * t;
-
-        // Perpendicular unit vector (rotated 90°)
         const px = -uy;
         const py =  ux;
-
-        // Side-step amount increases when closer
         const strafe = 0.8 + 2.5 * t;
-
-        // Flip direction sometimes for unpredictability
         const jitter = (Math.random() < 0.08 ? -1 : 1);
 
         ax += (-ux * mouseAccel) + (px * strafe * jitter);
         ay += (-uy * mouseAccel) + (py * strafe * jitter);
       }
 
-      // Wall repulsion
       const x = noRect.x;
       const y = noRect.y;
 
@@ -409,7 +387,6 @@
       if (dTop    < wallZone) ay += (wallZone - dTop)    / wallZone * 4.5;
       if (dBottom < wallZone) ay -= (wallZone - dBottom) / wallZone * 4.5;
 
-      // Velocity + damping
       const damping = 0.92;
       const maxSpeed = 32.0;
 
@@ -425,41 +402,33 @@
       let nx = x + noVX;
       let ny = y + noVY;
 
-      // Clamp + mild bounce
       if (nx < bounds.minX) { nx = bounds.minX; noVX = Math.abs(noVX) * 0.5; }
       if (nx > bounds.maxX) { nx = bounds.maxX; noVX = -Math.abs(noVX) * 0.5; }
       if (ny < bounds.minY) { ny = bounds.minY; noVY = Math.abs(noVY) * 0.5; }
       if (ny > bounds.maxY) { ny = bounds.maxY; noVY = -Math.abs(noVY) * 0.5; }
 
-      // Set new position
       noPos.x = nx;
       noPos.y = ny;
 
       applyButton(noBtn, noPos.x, noPos.y, noBase, noScale, false);
 
-      // Settle when far
       if (distCenter >= TRIGGER_DIST) {
         noVX *= 0.90;
         noVY *= 0.90;
       }
     }
 
-    // Make No react if mouse enters/presses it (extra safety like your Java code)
     function forceFleeFromEvent(ev) {
       if (ev && typeof ev.clientX === 'number') onMouseMove(ev);
     }
     noBtn.addEventListener('mouseenter', forceFleeFromEvent);
     noBtn.addEventListener('mousedown',  forceFleeFromEvent);
 
-    // Init
     layoutInitial();
     window.addEventListener('resize', () => layoutInitial());
     wrap.addEventListener('mousemove', onMouseMove);
 
-    /* =========================
-       Celebration FX (Yes click)
-       ========================= */
-
+    /* ===== Celebration FX ===== */
     const fx = document.getElementById('fx');
     const fxCtx = fx.getContext('2d', { alpha: true });
     const celebrate = document.getElementById('celebrate');
@@ -496,17 +465,14 @@
 
     function stepFX() {
       fxCtx.clearRect(0, 0, wrap.clientWidth, wrap.clientHeight);
-
-      // subtle trail
       fxCtx.fillStyle = 'rgba(255,245,247,0.12)';
       fxCtx.fillRect(0, 0, wrap.clientWidth, wrap.clientHeight);
 
       particles = particles.filter(p => p.life > 0);
-
       for (const p of particles) {
         p.life--;
         p.vx *= p.drag;
-        p.vy = p.vy * p.drag + 0.14; // gravity
+        p.vy = p.vy * p.drag + 0.14;
         p.x += p.vx;
         p.y += p.vy;
 
@@ -516,12 +482,8 @@
         fxCtx.fill();
       }
 
-      if (particles.length > 0) {
-        raf = requestAnimationFrame(stepFX);
-      } else {
-        fxCtx.clearRect(0, 0, wrap.clientWidth, wrap.clientHeight);
-        raf = null;
-      }
+      if (particles.length > 0) raf = requestAnimationFrame(stepFX);
+      else { fxCtx.clearRect(0, 0, wrap.clientWidth, wrap.clientHeight); raf = null; }
     }
 
     function spawnHearts(n = 26) {
@@ -529,7 +491,6 @@
         const h = document.createElement('div');
         h.className = 'heart';
         h.textContent = Math.random() < 0.5 ? '💖' : '💘';
-
         const x = wrap.clientWidth / 2 + (Math.random() * 220 - 110);
         const y = wrap.clientHeight / 2 + (Math.random() * 90 - 45);
         h.style.left = x + 'px';
@@ -537,7 +498,6 @@
         h.style.setProperty('--dx', (Math.random() * 300 - 150) + 'px');
         h.style.setProperty('--dy', (-260 - Math.random() * 260) + 'px');
         h.style.fontSize = (16 + Math.random() * 20) + 'px';
-
         wrap.appendChild(h);
         h.addEventListener('animationend', () => h.remove());
       }
@@ -545,14 +505,11 @@
 
     function celebrateYes() {
       result.textContent = 'Yay! Luv u 2!';
-
-      // show overlay + restart cupid animation
       celebrate.classList.add('show');
       celebrate.classList.remove('fly');
-      void celebrate.offsetWidth; // force reflow
+      void celebrate.offsetWidth;
       celebrate.classList.add('fly');
 
-      // bursts + hearts
       const cx = wrap.clientWidth / 2;
       const cy = wrap.clientHeight / 2;
       burst(cx, cy, 140);
@@ -562,16 +519,10 @@
 
       if (!raf) stepFX();
 
-      // hide overlay after a moment
-      setTimeout(() => {
-        celebrate.classList.remove('show');
-      }, 2200);
+      setTimeout(() => celebrate.classList.remove('show'), 2200);
     }
 
-    // Click behavior (updated Yes)
     yesBtn.addEventListener('click', celebrateYes);
-    noBtn.addActionListener?.(() => {}); // no-op if someone pastes into a JS environment with extensions
-
     noBtn.addEventListener('click', () => result.textContent = 'Noooooo how did u click it :(');
   </script>
 </body>
